@@ -60,19 +60,19 @@ const op::withdraw = "op::withdraw"c;
         .store_uint(query_id, 64)
         .store_coins(commission)
         .store_slice(admin_address)
-        .store_slice(admin_address)
+        .store_slice(from_address)
         .store_uint(0, 1)
-        .store_coins(1) 
+        .store_coins(0) 
         .store_uint(0, 8);
 
     var msg = begin_cell()
-        .store_uint(0x10, 6)
+        .store_uint(0x18, 6)
         .store_slice(contract_jetton_wallet_address)
-        .store_coins(100000000)
+        .store_coins(0)
         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
         .store_ref(msg_body.end_cell());
     
-    send_raw_message(msg.end_cell(), 2);
+    send_raw_message(msg.end_cell(), 64);
 
     save_data(commission_percent, admin_address, contract_jetton_amount, jetton_master_address, jetton_wallet_code);
 }
@@ -94,17 +94,17 @@ const op::withdraw = "op::withdraw"c;
         .store_slice(receiver_address)
         .store_slice(receiver_address)
         .store_uint(0, 1)
-        .store_coins(1) 
+        .store_coins(0) 
         .store_uint(0, 8);
     
     var msg = begin_cell()
-        .store_uint(0x10, 6)
+        .store_uint(0x18, 6)
         .store_slice(contract_jetton_wallet_address)
-        .store_coins(100000000)
+        .store_coins(0)
         .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
         .store_ref(msg_body.end_cell());
     
-    send_raw_message(msg.end_cell(), 2);
+    send_raw_message(msg.end_cell(), 64);
 
     contract_jetton_amount = 0;
 
@@ -157,3 +157,9 @@ int get_coins() method_id {
     (int commission_percent, slice admin_address, int contract_jetton_amount,  slice jetton_master_address, cell jetton_wallet_code) = load_data(); 
     return contract_jetton_amount;
 }
+
+int balance() method_id {
+    var [balance, _] = get_balance();
+    return balance;
+}
+

@@ -98,4 +98,9 @@ export class CommissionContract implements Contract {
         const result = await provider.get('get_coins', []);
         return result.stack.readNumber();
     }
+
+    async getBalance(provider: ContractProvider) {
+        const result = await provider.get('balance', []);
+        return result.stack.readNumber();
+    }
 }

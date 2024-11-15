@@ -95,14 +95,29 @@ describe('CommissionContract', () => {
         await jettonMinter.sendMint(deployer.getSender(), userWallet.address, toNano(100n), { value: toNano(2), queryId: toNano(9) });
     });
 
-    it('transfer notification', async () => {
+    it('transfer notification', async () => {        
         const sendAmount = 0.00000002;
         
-        const sendJettonsResult = await userJettonWallet.send(userWallet.getSender(), commissionContract.address, toNano(sendAmount), { value: toNano(2), queryId: 9n });
+        const sendJettonsResult = await userJettonWallet.send(userWallet.getSender(), commissionContract.address, toNano(sendAmount), { value: toNano(2), notify: {amount: toNano(2)}});
 
         expect(sendJettonsResult.transactions).toHaveTransaction({
             from: userJettonWallet.address,
             to: contractJettonWallet.address,
+            success: true,
+        });
+        expect(sendJettonsResult.transactions).toHaveTransaction({
+            from: contractJettonWallet.address,
+            to: commissionContract.address,
+            success: true,
+        });
+        expect(sendJettonsResult.transactions).toHaveTransaction({
+            from: commissionContract.address,
+            to: contractJettonWallet.address,
+            success: true,
+        });
+        expect(sendJettonsResult.transactions).toHaveTransaction({
+            from: contractJettonWallet.address,
+            to: adminJettonWallet.address,
             success: true,
         });
 
@@ -127,7 +142,7 @@ describe('CommissionContract', () => {
 
         expect((await contractJettonWallet.getData()).balance).toEqual(toNano(0));
         expect(balanceContractJettonWallet + balanceUserJettonWallet).toEqual((await userJettonWallet.getData()).balance);
-        })
+    })
 
     // it('should deploy', async () => {
     //     // the check is done inside beforeEach
