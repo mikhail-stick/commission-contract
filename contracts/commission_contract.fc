@@ -143,23 +143,7 @@ const op::withdraw = "op::withdraw"c;
     throw(0xffff); 
 }
 
-int get_commission() method_id {
+(int, slice, int) get_contract_data() method_id {
     (int commission_percent, slice admin_address, int contract_jetton_amount,  slice jetton_master_address, cell jetton_wallet_code) = load_data(); 
-    return commission_percent;
+    return (commission_percent, admin_address, contract_jetton_amount);
 }
-
-slice get_admin() method_id {
-    (int commission_percent, slice admin_address, int contract_jetton_amount,  slice jetton_master_address, cell jetton_wallet_code) = load_data(); 
-    return admin_address;
-}
-
-int get_coins() method_id {
-    (int commission_percent, slice admin_address, int contract_jetton_amount,  slice jetton_master_address, cell jetton_wallet_code) = load_data(); 
-    return contract_jetton_amount;
-}
-
-int balance() method_id {
-    var [balance, _] = get_balance();
-    return balance;
-}
-

@@ -95,7 +95,7 @@ describe('CommissionContract', () => {
         await jettonMinter.sendMint(deployer.getSender(), userWallet.address, toNano(100n), { value: toNano(2), queryId: toNano(9) });
     });
 
-    it('transfer notification', async () => {        
+    it('send tokens', async () => {        
         const sendAmount = 0.00000002;
         
         const sendJettonsResult = await userJettonWallet.send(userWallet.getSender(), commissionContract.address, toNano(sendAmount), { value: toNano(2), notify: {amount: toNano(2)}});
@@ -125,18 +125,39 @@ describe('CommissionContract', () => {
 
         expect((await adminJettonWallet.getData()).balance).toEqual(toNano(balanceAdminJettonWallet));
         expect((await contractJettonWallet.getData()).balance).toEqual(toNano(sendAmount - balanceAdminJettonWallet));
+    })
+
+    it ('withdraw tokens', async () => {
+        const sendAmount = 0.00000002;
+        
+        await userJettonWallet.send(userWallet.getSender(), commissionContract.address, toNano(sendAmount), { value: toNano(2), notify: {amount: toNano(2)}});
 
         const balanceUserJettonWallet = (await userJettonWallet.getData()).balance;
         const balanceContractJettonWallet = (await contractJettonWallet.getData()).balance;        
     
-        const changeAdminResult = await commissionContract.sendWithdraw(adminWallet.getSender(), {
+        const withdrawResult = await commissionContract.sendWithdraw(adminWallet.getSender(), {
             receiverAddress: userWallet.address,
             value: toNano('0.05')
         });
 
-        expect(changeAdminResult.transactions).toHaveTransaction({
+        expect(withdrawResult.transactions).toHaveTransaction({
             from: adminWallet.address,
             to: commissionContract.address,
+            success: true,
+        });
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: commissionContract.address,
+            to: contractJettonWallet.address,
+            success: true,
+        });
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: contractJettonWallet.address,
+            to: userJettonWallet.address,
+            success: true,
+        });
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: userJettonWallet.address,
+            to: userWallet.address,
             success: true,
         });
 
@@ -144,10 +165,23 @@ describe('CommissionContract', () => {
         expect(balanceContractJettonWallet + balanceUserJettonWallet).toEqual((await userJettonWallet.getData()).balance);
     })
 
-    // it('should deploy', async () => {
-    //     // the check is done inside beforeEach
-    //     // blockchain and commissionContract are ready to use
-    // });
+    it ('[fail] withdraw tokens', async () => {
+        const sendAmount = 0.000002;
+        
+        await userJettonWallet.send(userWallet.getSender(), commissionContract.address, toNano(sendAmount), { value: toNano(2), notify: {amount: toNano(2)}});
+
+        const withdrawResult = await commissionContract.sendWithdraw(userWallet.getSender(), {
+            receiverAddress: userWallet.address,
+            value: toNano('0.05')
+        });
+
+        expect(withdrawResult.transactions).toHaveTransaction({
+            from: userWallet.address,
+            to: commissionContract.address,
+            success: false,
+            exitCode: 73,
+        });
+    })
 
     it ('change admin', async () => {
         const newAdminWallet = await blockchain.treasury('newAdmin');

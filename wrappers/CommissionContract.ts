@@ -84,23 +84,26 @@ export class CommissionContract implements Contract {
         });
     }
 
+    async getData(provider: ContractProvider) {
+        const result = await provider.get('get_contract_data', []);
+        const commission = result.stack.readNumber();
+        const adminAddress = result.stack.readAddress();
+        const coins = result.stack.readNumber();
+        return { commission, adminAddress, coins }; 
+    }
+
     async getCommission(provider: ContractProvider) {
-        const result = await provider.get('get_commission', []);
-        return result.stack.readNumber();
+        const { commission } = await this.getData(provider);
+        return commission;
     }
 
     async getAdmin(provider: ContractProvider) {
-        const result = await provider.get('get_admin', []);
-        return result.stack.readAddress();
+        const { adminAddress } = await this.getData(provider);
+        return adminAddress;
     }
 
     async getCoins(provider: ContractProvider) {
-        const result = await provider.get('get_coins', []);
-        return result.stack.readNumber();
-    }
-
-    async getBalance(provider: ContractProvider) {
-        const result = await provider.get('balance', []);
-        return result.stack.readNumber();
+        const { coins } = await this.getData(provider);
+        return coins;
     }
 }
