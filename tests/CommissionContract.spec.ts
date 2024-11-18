@@ -120,6 +120,11 @@ describe('CommissionContract', () => {
             to: adminJettonWallet.address,
             success: true,
         });
+        expect(sendJettonsResult.transactions).toHaveTransaction({
+            from: adminJettonWallet.address,
+            to: adminWallet.address,
+            success: true,
+        });
 
         const balanceAdminJettonWallet = Math.floor((sendAmount * commisionPercent / 100) * 1_000_000_000) / 1_000_000_000;
 
